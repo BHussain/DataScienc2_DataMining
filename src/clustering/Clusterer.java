@@ -84,28 +84,71 @@ public class Clusterer {
 		}
 		return Math.sqrt(distanceSquared);
 	}
-	
+
+	private void calculateCentroid(){
+		//newVector.get(i)+= member.get(i);
+		/**
+		 * 0,0,1
+		 * 1,0,1
+		 * ------ +
+		 * 1,0,2
+		 *
+		 * 1/2 = 0,5
+		 * 0/2= 0
+		 * 2/2 = 1
+		 *
+		 * 0,0,1
+		 */
+
+		for(Cluster cluster : clusters){
+			Vector<Integer> result = new Vector<>();
+			for(Vector<Integer> member : cluster.getMembers()){
+				for(int i=0;i<member.size();i++){
+					if(result.size() < member.size()){
+						result.add(i, member.get(i));
+					} else{
+						result.set(i, member.get(i)+result.get(i));
+					}
+				}
+			}
+
+			for(int i=0;i<result.size();i++){
+				result.set(i, result.get(i) / cluster.getMembers().size());
+			}
+			cluster.setCentroid(result);
+		}
+	}
+
 	public static void main(String[] args) throws IOException{
 		DataLoader loader = new DataLoader();
 		loader.loadData();
 		Clusterer cluster = new Clusterer(3,loader.getDataSet());
 		cluster.init();
 		cluster.group();
-		int j  = 0;
-		for(Vector<Integer> centroid: cluster.centroids){
-			String output= "";
-			for(int i=0;i<centroid.size();i++){
-				output += centroid.get(i);
-			}
-			j++;
-			System.out.println(j+" : " +output);
-			
-		}
-
+		System.out.println("before");
 		for(Cluster c : cluster.clusters){
 			System.out.println(c.getMembers().size());
 		}
 
+		cluster.calculateCentroid();
+		System.out.println("after");
+		for(Cluster c : cluster.clusters){
+			System.out.println(c.getMembers().size());
+		}
+
+		//int j  = 0;
+//		for(Vector<Integer> centroid: cluster.centroids){
+//			String output= "";
+//			for(int i=0;i<centroid.size();i++){
+//				output += centroid.get(i);
+//			}
+//			j++;
+//			System.out.println(j+" : " +output);
+//
+//		}
+
+
+
 	}
-	
+
 }
