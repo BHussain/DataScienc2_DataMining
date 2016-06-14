@@ -1,5 +1,12 @@
 package clustering;
 
+import loading.DataLoader;
+import models.Cluster;
+import org.omg.CORBA.portable.Streamable;
+
+import java.io.IOException;
+import java.util.*;
+
 public class Clusterer {
 	
 	Random rand = new Random();
@@ -26,6 +33,7 @@ public class Clusterer {
 				i--;
 			}	
 		}
+		createClusters();
 	}
 	
 	public void createClusters(){
@@ -37,7 +45,30 @@ public class Clusterer {
 	}
 	
 	public void group(){
-		
+		for(Vector<Integer> user : dataSet){
+			Map<Double, Cluster> distances = new HashMap<>();
+
+			for(Cluster cluster: clusters){
+				double distanceToCentroid = calculateDistance(user, cluster.getCentroid());
+				distances.put(distanceToCentroid, cluster);
+			}
+
+			getLowestDistanceCentroid(distances).addMember(user);
+		}
+	}
+
+	private static Cluster getLowestDistanceCentroid(Map<Double, Cluster> distances){
+		boolean first = true;
+		double lowestDistance = 0;
+		for(Double distance : distances.keySet()){
+			if(first) {
+				first = false;
+				lowestDistance = distance;
+			}else if(distance < lowestDistance){
+				lowestDistance = distance;
+			}
+		}
+		return distances.get(lowestDistance);
 	}
 	
 	/**
@@ -59,6 +90,7 @@ public class Clusterer {
 		loader.loadData();
 		Clusterer cluster = new Clusterer(3,loader.getDataSet());
 		cluster.init();
+		cluster.group();
 		int j  = 0;
 		for(Vector<Integer> centroid: cluster.centroids){
 			String output= "";
@@ -69,6 +101,11 @@ public class Clusterer {
 			System.out.println(j+" : " +output);
 			
 		}
+
+		for(Cluster c : cluster.clusters){
+			System.out.println(c.getMembers().size());
+		}
+
 	}
 	
 }

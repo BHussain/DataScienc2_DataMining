@@ -1,11 +1,12 @@
 package models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
 public class Cluster {
 	private Vector<Integer> centroid;
-	private List<Vector<Integer>> members;
+	private List<Vector<Integer>> members = new ArrayList<>();
 	
 	public Vector<Integer> getCentroid() {
 		return centroid;
