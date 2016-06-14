@@ -102,18 +102,12 @@ public class Clusterer {
 
 		for(Cluster cluster : clusters){
 			Vector<Integer> result = new Vector<>();
-			for(Vector<Integer> member : cluster.getMembers()){
-				for(int i=0;i<member.size();i++){
-					if(result.size() < member.size()){
-						result.add(i, member.get(i));
-					} else{
-						result.set(i, member.get(i)+result.get(i));
-					}
+			for(int i=0; i <cluster.getMembers().get(0).size(); i++){
+				int sum = 0;
+				for(Vector<Integer> member : cluster.getMembers()){
+					sum += member.get(i);
 				}
-			}
-
-			for(int i=0;i<result.size();i++){
-				result.set(i, result.get(i) / cluster.getMembers().size());
+				result.add(sum / cluster.getMembers().size());
 			}
 			cluster.setCentroid(result);
 		}
@@ -122,18 +116,20 @@ public class Clusterer {
 	public static void main(String[] args) throws IOException{
 		DataLoader loader = new DataLoader();
 		loader.loadData();
-		Clusterer cluster = new Clusterer(3,loader.getDataSet());
+		Clusterer cluster = new Clusterer(4,loader.getDataSet());
 		cluster.init();
 		cluster.group();
-		System.out.println("before");
+
 		for(Cluster c : cluster.clusters){
 			System.out.println(c.getMembers().size());
+			System.out.println("centroid before: "+c.getCentroid());
 		}
 
 		cluster.calculateCentroid();
-		System.out.println("after");
+
 		for(Cluster c : cluster.clusters){
 			System.out.println(c.getMembers().size());
+			System.out.println("centroid after: "+c.getCentroid());
 		}
 
 		//int j  = 0;
