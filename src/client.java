@@ -10,7 +10,7 @@ public class client {
         loader.loadData();
 
         Clusterer cluster = new Clusterer(3, loader.getDataSet());
-        cluster.init(100);
+        cluster.execute();
 
         for(Cluster c : cluster.getClusters()){
         	System.out.println("The Sum of Squared Errors in this cluster: "+c.getSSE()+"\n");

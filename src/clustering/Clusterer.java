@@ -17,7 +17,7 @@ public class Clusterer {
 		this.dataSet = dataSet;
 	}
 	
-	public void init(int amountOfTimes){
+	public void execute(){
 		for(int i=0;i < amountOfCentroids; i++){
 			int  n = rand.nextInt(100);
 			Vector candidate = dataSet.get(n);
@@ -29,13 +29,14 @@ public class Clusterer {
 			}	
 		}
 		createClusters();
-        run(amountOfTimes);
+        run();
 	}
 	
 	public void createClusters(){
 		for(Vector<Double> centroid:centroids){
 			Cluster cluster =new Cluster();
 			cluster.setCentroid(centroid);
+			cluster.setSSE(1000000);
 			clusters.add(cluster);
 		}
 	}
@@ -110,11 +111,46 @@ public class Clusterer {
 		}
 	}
 
-    public void run(int amountOfTimes){
-        for(int i = 0; i < amountOfTimes; i++){
+    public void run(){
+    	Boolean loop = true;
+    	int count = 0;
+    	while(loop==true){
+    		count++;
+    		System.out.println("looping");
+    		List<Cluster> oldClusters = new ArrayList<>();
+    		for(Cluster cluster:clusters){
+    			Cluster newCluster = new Cluster();
+    			newCluster.setCentroid(cluster.getCentroid());
+    			newCluster.setMembers(cluster.getMembers());
+    			newCluster.setSSE(cluster.getSSE());
+    			oldClusters.add(newCluster);
+    		}
             group();
             calculateCentroid();
-        }
+            List<Cluster> newClusters = clusters;
+            
+            int amountCorrect=0;
+            
+            for(int i=0;i<oldClusters.size();i++){
+            	/*
+            	System.out.println(oldClusters.get(i).getSSE()-newClusters.get(i).getSSE());
+            	if((oldClusters.get(i).getSSE()-newClusters.get(i).getSSE())==0){
+                	amountCorrect++;
+                }
+            	if(amountCorrect==oldClusters.size()){
+            		loop = false;
+            	}
+            	*/
+            	if(calculateDistance(oldClusters.get(i).getCentroid(),newClusters.get(i).getCentroid())==0){
+                	amountCorrect++;
+                }
+            	if(amountCorrect==oldClusters.size()){
+            		loop = false;
+            	}
+            }
+            
+    	}
+    	System.out.println(count);
     }
 
     public List<Cluster> getClusters(){
