@@ -1,29 +1,24 @@
 package clustering;
 
-import loading.DataLoader;
 import models.Cluster;
-import org.omg.CORBA.portable.Streamable;
-
-import java.io.IOException;
 import java.util.*;
 
 public class Clusterer {
 	
 	Random rand = new Random();
 	private int amountOfCentroids;
-	
-	private List<Vector<Integer>> centroids = new ArrayList<>();
-	private List<Vector<Integer>> dataSet;
+
+    private List<Vector<Double>> dataSet;
+	private List<Vector<Double>> centroids = new ArrayList<>();
 	private List<Cluster> clusters = new ArrayList<>();
 	
-	
-	public Clusterer(int amountOfCentroids,List<Vector<Integer>> dataSet){
+	public Clusterer(int amountOfCentroids,List<Vector<Double>> dataSet){
 		this.amountOfCentroids = amountOfCentroids;
 		this.dataSet = dataSet;
 	}
 	
-	public void init(){
-		for(int i=0;i<amountOfCentroids;i++){
+	public void init(int amountOfTimes){
+		for(int i=0;i < amountOfCentroids; i++){
 			int  n = rand.nextInt(100);
 			Vector candidate = dataSet.get(n);
 			if(!centroids.contains(candidate)){
@@ -34,10 +29,11 @@ public class Clusterer {
 			}	
 		}
 		createClusters();
+        run(amountOfTimes);
 	}
 	
 	public void createClusters(){
-		for(Vector<Integer> centroid:centroids){
+		for(Vector<Double> centroid:centroids){
 			Cluster cluster =new Cluster();
 			cluster.setCentroid(centroid);
 			clusters.add(cluster);
@@ -45,7 +41,8 @@ public class Clusterer {
 	}
 	
 	public void group(){
-		for(Vector<Integer> user : dataSet){
+        clearClusters();
+		for(Vector<Double> user : dataSet){
 			Map<Double, Cluster> distances = new HashMap<>();
 
 			for(Cluster cluster: clusters){
@@ -53,11 +50,12 @@ public class Clusterer {
 				distances.put(distanceToCentroid, cluster);
 			}
 
-			getLowestDistanceCentroid(distances).addMember(user);
+			getLowestDistanceCluster(distances).addMember(user);
+            calculateSSE();
 		}
 	}
 
-	private static Cluster getLowestDistanceCentroid(Map<Double, Cluster> distances){
+	private static Cluster getLowestDistanceCluster(Map<Double, Cluster> distances){
 		boolean first = true;
 		double lowestDistance = 0;
 		for(Double distance : distances.keySet()){
@@ -77,7 +75,7 @@ public class Clusterer {
 	 * @param second
 	 * @return
 	 */
-	public double calculateDistance(Vector<Integer> first, Vector<Integer> second){
+	public double calculateDistance(Vector<Double> first, Vector<Double> second){
 		double distanceSquared = 0.0;
 		for(int i =0;i<first.size();i++){
 			distanceSquared += Math.pow(first.get(i)-second.get(i),2);
@@ -85,8 +83,7 @@ public class Clusterer {
 		return Math.sqrt(distanceSquared);
 	}
 
-	private void calculateCentroid(){
-		//newVector.get(i)+= member.get(i);
+	public void calculateCentroid(){
 		/**
 		 * 0,0,1
 		 * 1,0,1
@@ -101,10 +98,10 @@ public class Clusterer {
 		 */
 
 		for(Cluster cluster : clusters){
-			Vector<Integer> result = new Vector<>();
+			Vector<Double> result = new Vector<>();
 			for(int i=0; i <cluster.getMembers().get(0).size(); i++){
-				int sum = 0;
-				for(Vector<Integer> member : cluster.getMembers()){
+				double sum = 0;
+				for(Vector<Double> member : cluster.getMembers()){
 					sum += member.get(i);
 				}
 				result.add(sum / cluster.getMembers().size());
@@ -113,38 +110,30 @@ public class Clusterer {
 		}
 	}
 
-	public static void main(String[] args) throws IOException{
-		DataLoader loader = new DataLoader();
-		loader.loadData();
-		Clusterer cluster = new Clusterer(4,loader.getDataSet());
-		cluster.init();
-		cluster.group();
+    public void run(int amountOfTimes){
+        for(int i = 0; i < amountOfTimes; i++){
+            group();
+            calculateCentroid();
+        }
+    }
 
-		for(Cluster c : cluster.clusters){
-			System.out.println(c.getMembers().size());
-			System.out.println("centroid before: "+c.getCentroid());
-		}
+    public List<Cluster> getClusters(){
+        return this.clusters;
+    }
 
-		cluster.calculateCentroid();
+    private void clearClusters(){
+        for(Cluster cluster: clusters){
+            cluster.getMembers().clear();
+        }
+    }
 
-		for(Cluster c : cluster.clusters){
-			System.out.println(c.getMembers().size());
-			System.out.println("centroid after: "+c.getCentroid());
-		}
-
-		//int j  = 0;
-//		for(Vector<Integer> centroid: cluster.centroids){
-//			String output= "";
-//			for(int i=0;i<centroid.size();i++){
-//				output += centroid.get(i);
-//			}
-//			j++;
-//			System.out.println(j+" : " +output);
-//
-//		}
-
-
-
-	}
-
+    private void calculateSSE(){
+        for(Cluster c : clusters){
+            double SSE = 0.0;
+            for(Vector<Double> member : c.getMembers()){
+                SSE += Math.sqrt(calculateDistance(member, c.getCentroid()));
+            }
+            c.setSSE(SSE);
+        }
+    }
 }

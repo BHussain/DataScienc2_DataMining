@@ -12,12 +12,12 @@ public class DataLoader {
 	private BufferedReader inputStream = null;
     private String splitter = ",";
 	private String line;
-	private List<Vector<Integer>> vectorList = new ArrayList<>();
+	private List<Vector<Double>> vectorList = new ArrayList<>();
 	
 	/**Create a dataset */
 	public void initDataSet(int columns){
 		for(int i=0;i<columns;i++){
-			Vector user = new Vector<Integer>();
+			Vector user = new Vector<Double>();
 			this.vectorList.add(user);
 		}
 	}
@@ -34,7 +34,7 @@ public class DataLoader {
 	        	}
 	        	
 	        	for(int i=0;i<data.length;i++){
-	        		vectorList.get(i).add(Integer.parseInt(data[i]));
+	        		vectorList.get(i).add(Double.parseDouble(data[i]));
 	        	}	            
 	        }	
 	    } finally {
@@ -45,14 +45,14 @@ public class DataLoader {
 
 		}
 	
-	public List<Vector<Integer>> getDataSet(){
+	public List<Vector<Double>> getDataSet(){
 		return this.vectorList;
 	}
 	
 	public static void main(String[] args) throws IOException{
 		DataLoader loader = new DataLoader();
 		loader.loadData();
-		for(Vector<Integer> user: loader.vectorList){
+		for(Vector<Double> user: loader.vectorList){
 			String output = "";
 			for(int i=0;i<user.size();i++){
 				output += user.get(i);
