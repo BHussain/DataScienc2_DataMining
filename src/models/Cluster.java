@@ -1,8 +1,14 @@
 package models;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
+import java.util.stream.Stream;
 
 public class Cluster {
 	private Vector<Double> centroid;
@@ -32,5 +38,49 @@ public class Cluster {
 	public void addMember(Vector<Double> member){
 		members.add(member);
 	}
+	
+	/**
+	 * Determine the most popular items in the cluster.
+	 * Return how many times these items were bought
+	 * 
+	 * I.E
+	 * 
+	 * Offer 3 -> bought 10 times
+	 * Offer 2 -> bought 8 times
+	 * .
+	 * .
+	 * .
+	 * Offer n -> bought n times
+	 * 
+	 * @return
+	 */
+	public String getPrintData(){		
+		/**Determine for each wine how often it was sold */
+		Map<Integer,Double> winesSold = new HashMap<>();
+		for(Vector<Double> member: members){
+			for(int i =0; i<member.size(); i++){
+				if(!winesSold.containsKey(i)){
+					winesSold.put(i, member.get(i));
+				}else{
+					winesSold.put(i, winesSold.get(i)+member.get(i));
+				}
+			}
+			
+		}
+		Map<Integer, Double> result = new LinkedHashMap<>();
+		Stream<Map.Entry<Integer,Double>> st = winesSold.entrySet().stream();
+
+		st.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEach(e->result.put(e.getKey(), e.getValue()));
+		
+		/**Build the output string*/
+		String output = "";
+		for(Integer wine:result.keySet()){
+			output+= "Offer "+ (wine+1)+" was sold "+ winesSold.get(wine)+ " times." + "\n";
+		}
+		return output;
+		
+	}
+	
+	
 
 }
