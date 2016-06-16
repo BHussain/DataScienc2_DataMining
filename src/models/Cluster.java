@@ -75,7 +75,7 @@ public class Cluster {
 		/**Build the output string*/
 		String output = "";
 		for(Integer wine:result.keySet()){
-			output+= "Offer "+ (wine+1)+" was sold "+ winesSold.get(wine)+ " times." + "\n";
+			output+= "Offer "+ (wine+1)+" was sold "+ winesSold.get(wine).intValue()+ " times." + "\n";
 		}
 		return output;
 		

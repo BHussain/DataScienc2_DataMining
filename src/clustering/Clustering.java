@@ -1,9 +1,11 @@
 package clustering;
 
 import models.Cluster;
+import models.Solution;
+
 import java.util.*;
 
-public class Clusterer {
+public class Clustering {
 	
 	Random rand = new Random();
 	private int amountOfCentroids;
@@ -11,25 +13,50 @@ public class Clusterer {
     private List<Vector<Double>> dataSet;
 	private List<Vector<Double>> centroids = new ArrayList<>();
 	private List<Cluster> clusters = new ArrayList<>();
+	private Solution solution;
 	
-	public Clusterer(int amountOfCentroids,List<Vector<Double>> dataSet){
+	public Clustering(int amountOfCentroids, List<Vector<Double>> dataSet){
 		this.amountOfCentroids = amountOfCentroids;
 		this.dataSet = dataSet;
 	}
 	
-	public void execute(){
-		for(int i=0;i < amountOfCentroids; i++){
-			int  n = rand.nextInt(100);
-			Vector candidate = dataSet.get(n);
-			if(!centroids.contains(candidate)){
-				centroids.add(candidate);
-			}else{
-				/**to keep the same amount of iterations*/
-				i--;
-			}	
+	public Solution execute(int loopAmount){
+		for(int i=0; i<loopAmount; i++){
+			centroids.clear();
+			clusters.clear();
+
+			for(int j=0;j < amountOfCentroids; j++){
+				int  n = rand.nextInt(100);
+				Vector candidate = dataSet.get(n);
+				if(!centroids.contains(candidate)){
+					centroids.add(candidate);
+				}else{
+					/**to keep the same amount of iterations*/
+					j--;
+				}
+			}
+			createClusters();
+			run();
+
+			Solution newSolution = new Solution(countSSE(), copyClusters(clusters));
+			if(solution == null){
+				solution = newSolution;
+			}
+			else if(newSolution.getSSE() < solution.getSSE()){
+				solution = newSolution;
+			}
+
+
 		}
-		createClusters();
-        run();
+		return solution;
+	}
+
+	private double countSSE(){
+		double SSE = 0.0;
+		for(Cluster cluster:clusters){
+			SSE += cluster.getSSE();
+		}
+		return SSE;
 	}
 	
 	public void createClusters(){
@@ -113,35 +140,15 @@ public class Clusterer {
 
     public void run(){
     	Boolean loop = true;
-    	int count = 0;
-    	while(loop==true){
-    		count++;
-    		System.out.println("looping");
-    		List<Cluster> oldClusters = new ArrayList<>();
-    		for(Cluster cluster:clusters){
-    			Cluster newCluster = new Cluster();
-    			newCluster.setCentroid(cluster.getCentroid());
-    			newCluster.setMembers(cluster.getMembers());
-    			newCluster.setSSE(cluster.getSSE());
-    			oldClusters.add(newCluster);
-    		}
+    	while(loop){
+    		List<Cluster> oldClusters = copyClusters(clusters);
             group();
             calculateCentroid();
-            List<Cluster> newClusters = clusters;
             
             int amountCorrect=0;
             
             for(int i=0;i<oldClusters.size();i++){
-            	/*
-            	System.out.println(oldClusters.get(i).getSSE()-newClusters.get(i).getSSE());
-            	if((oldClusters.get(i).getSSE()-newClusters.get(i).getSSE())==0){
-                	amountCorrect++;
-                }
-            	if(amountCorrect==oldClusters.size()){
-            		loop = false;
-            	}
-            	*/
-            	if(calculateDistance(oldClusters.get(i).getCentroid(),newClusters.get(i).getCentroid())==0){
+            	if(calculateDistance(oldClusters.get(i).getCentroid(),clusters.get(i).getCentroid())==0){
                 	amountCorrect++;
                 }
             	if(amountCorrect==oldClusters.size()){
@@ -150,12 +157,23 @@ public class Clusterer {
             }
             
     	}
-    	System.out.println(count);
     }
 
     public List<Cluster> getClusters(){
         return this.clusters;
     }
+
+	private List<Cluster> copyClusters(List<Cluster> clusters){
+		List<Cluster> oldClusters = new ArrayList<>();
+		for(Cluster cluster:clusters){
+			Cluster newCluster = new Cluster();
+			newCluster.setCentroid(cluster.getCentroid());
+			newCluster.setMembers(cluster.getMembers());
+			newCluster.setSSE(cluster.getSSE());
+			oldClusters.add(newCluster);
+		}
+		return oldClusters;
+	}
 
     private void clearClusters(){
         for(Cluster cluster: clusters){
