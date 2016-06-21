@@ -185,7 +185,7 @@ public class Clustering {
         for(Cluster c : clusters){
             double SSE = 0.0;
             for(Vector<Double> member : c.getMembers()){
-                SSE += Math.sqrt(calculateDistance(member, c.getCentroid()));
+                SSE += Math.pow(calculateDistance(member, c.getCentroid()),2);
             }
             c.setSSE(SSE);
         }

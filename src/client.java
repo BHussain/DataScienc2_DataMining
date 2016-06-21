@@ -10,8 +10,8 @@ public class client {
         DataLoader loader = new DataLoader();
         loader.loadData();
 
-        Clustering cluster = new Clustering(3, loader.getDataSet());
-        Solution solution = cluster.execute(50);
+        Clustering cluster = new Clustering(4, loader.getDataSet());
+        Solution solution = cluster.execute(200);
 
         System.out.println("Total SSE: "+solution.getSSE());
         for(Cluster c : solution.getClusters()){
