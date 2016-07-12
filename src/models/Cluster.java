@@ -11,14 +11,17 @@ import java.util.Vector;
 import java.util.stream.Stream;
 
 public class Cluster {
-	private Vector<Double> centroid;
-	private List<Vector<Double>> members = new ArrayList<>();
+	//private Vector<Double> centroid;
+	private List<Double> centroid;
+	//private List<Vector<Double>> members = new ArrayList<>();
+	private List<List<Double>> members = new ArrayList<>();
 	private double SSE = 0.0;
 
 	public double getSSE() { return SSE; }
 
 	public void setSSE(double SSE) { this.SSE = SSE; }
 	
+	/*
 	public Vector<Double> getCentroid() {
 		return centroid;
 	}
@@ -38,6 +41,29 @@ public class Cluster {
 	public void addMember(Vector<Double> member){
 		members.add(member);
 	}
+	*/
+	
+	
+	public List<Double> getCentroid() {
+		return centroid;
+	}
+	
+	public void setCentroid(List<Double> centroid) {
+		this.centroid = centroid;
+	}
+
+	public List<List<Double>> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<List<Double>> members) {
+		this.members = members;
+	}
+	
+	public void addMember(List<Double> member){
+		members.add(member);
+	}
+	
 	
 	/**
 	 * Determine the most popular items in the cluster.
@@ -57,7 +83,7 @@ public class Cluster {
 	public String getPrintData(){		
 		/**Determine for each wine how often it was sold */
 		Map<Integer,Double> winesSold = new HashMap<>();
-		for(Vector<Double> member: members){
+		for(List<Double> member: members){
 			for(int i =0; i<member.size(); i++){
 				if(!winesSold.containsKey(i)){
 					winesSold.put(i, member.get(i));
